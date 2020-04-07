@@ -5,23 +5,33 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+# timesteps
 t = 50000
 q = lambda p : (1 - p)
+# t axis for plotting
 tintervals = np.arange(1, t + 1, 1)
+#k  axis for plotting
 kintervals = 0
 tick_spacing_time = t/5
 
+#network model
 class Network:
     def __init__ (self):
+        #current node number
         self.current = 1
+        #node count
         self.n = 1.0
+        #edge count
         self.m = 1
+        #plotting counts
         self.nt = [0]
         self.mt = [0]
+        #distribution counts
         self.nodesK = [1]
         self.graph = {1: [1]}
 
     def addNode(self, target):
+        #processes possible empty graph
         if self.n != 0:
             self.graph[self.current+1] = [target]
             targetL = len(self.graph[target])
@@ -73,7 +83,7 @@ class Network:
         self.nt.append(self.n)
         self.mt.append(self.m)
 
-        
+#numerical solutions       
 class Numerical: 
     def __init__ (self):
         self.nt = [] * t
@@ -93,19 +103,24 @@ class Numerical:
         self.nodesk.append(res)
 
 def main():
+    #plots for simulation results
     setSimNodes = []
     setSimEdges = []
-
+    #plots for numerical results
     setNumNodes = []
     setNumEdges = []
 
+    #distribution plot data
     numDistModel = []
     numDist = []
 
     pVals = [0.6, 0.75, 0.9]
     kintervals = []
+
+    #allows for repition of simulation
     reps = 1
 
+    #node and edge data testing
     for p in pVals:
         results = testingCycle(p, reps)
         setSimNodes.append(results[0][0])
@@ -113,6 +128,7 @@ def main():
         setNumNodes.append(results[1][0])
         setNumEdges.append(results [1][1])
 
+    #distribution testing
     numDistModel, kintervals, net = runDistSimulation()
     numDist = runNumerical(kintervals, net.n)
 
@@ -126,12 +142,15 @@ def updateNetwork(p, net):
         birth(net)
     else: 
         death(net)
-   
+
+#runs numerical and simulation testing cycles
 def testingCycle(p, reps):
     numResults = []
     simResults = []
 
+    #creates multiple networks if there are repitions specified
     networks = map(lambda x: Network(), range(1, reps + 1))
+    #placeholders for averaging
     netNodes = [0]
     netEdges = [0]
     num = Numerical()
@@ -142,6 +161,7 @@ def testingCycle(p, reps):
         map(lambda net: multiSim(t, p, net), networks)
     numResults.append(num.nt)
     numResults.append(num.mt)
+    #averages output data at each time interval for simulation
     for i in range(1, 6):
         sumNodes = 0
         sumEdges = 0
@@ -163,6 +183,7 @@ def multiSim(t, p, net):
                 net.updateStats()
 
 
+#runs model simulation for degree distribution experiment
 def runDistSimulation():
     kintervals = []
     normalizedData = []
@@ -176,6 +197,7 @@ def runDistSimulation():
     kintervals = np.arange(1, len(normalizedData) + 1, 1)
     return [normalizedData, kintervals, net]
 
+#runs numerical analysis for degree distribution
 def runNumerical(kintervals, n):
     num = Numerical()
     for k in kintervals:
